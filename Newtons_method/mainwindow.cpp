@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "newtons_method.h"
+#include <QColor>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -15,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->customPlot->axisRect()->setupFullAxesBox();
   
   ui->customPlot->plotLayout()->insertRow(0);
-  QCPTextElement *title = new QCPTextElement(ui->customPlot, "Simple iterations", QFont("sans", 17, QFont::Bold));
+  QCPTextElement *title = new QCPTextElement(ui->customPlot, "Newton's method", QFont("sans", 17, QFont::Bold));
   ui->customPlot->plotLayout()->addElement(0, 0, title);
   
   ui->customPlot->xAxis->setLabel("x Axis");
@@ -27,11 +29,27 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->customPlot->legend->setSelectedFont(legendFont);
   ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
   
-  addRandomGraph();
-  addRandomGraph();
-  addRandomGraph();
-  addRandomGraph();
-  ui->customPlot->rescaleAxes();
+    QCustomPlot *plot = ui->customPlot;
+    QCPColorMap *colorMap = new QCPColorMap(plot->xAxis, plot->yAxis);
+    int size_1 = 2000;
+    int size_2 = 2000;
+    colorMap->data()->setSize(size_1, size_2);
+    colorMap->data()->setRange(QCPRange(-4, 4), QCPRange(-4, 4));
+    
+    colorMap->setInterpolate(false);
+    colorMap->setGradient(QCPColorGradient::gpSpectrum);
+        
+    double x, y;
+    for (int e = 0; e < size_1; e++) {
+        for (int r = 0; r < size_2; r++) {
+            colorMap->data()->cellToCoord(e, r, &x, &y);
+            colorMap->data()->setCell(e, r, calculate_color(x, y, 0.00001));
+        }
+    }
+    colorMap->setDataRange({-1, 1});
+    
+    plot->rescaleAxes();
+    plot->replot();
   
   // connect slot that ties some axis selections together (especially opposite axes):
   connect(ui->customPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
@@ -262,13 +280,17 @@ void MainWindow::moveLegend()
   }
 }
 
-void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex)
-{
-  // since we know we only have QCPGraphs in the plot, we can immediately access interface1D()
-  // usually it's better to first check whether interface1D() returns non-zero, and only then use it.
-  double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
-  QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(dataIndex).arg(dataValue);
-  ui->statusBar->showMessage(message, 2500);
+void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex) {
+    // since we know we only have QCPGraphs in the plot, we can immediately access interface1D()
+    // usually it's better to first check whether interface1D() returns non-zero, and only then use it.
+    // upd - *dont know
+    if (plottable->interface1D() != nullptr) {
+        double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
+        QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(dataIndex).arg(dataValue);
+        ui->statusBar->showMessage(message, 2500);
+    } else {
+        // TODO
+    }
 }
 
 
