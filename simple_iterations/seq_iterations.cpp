@@ -4,11 +4,13 @@
 
 using dbl = double;
 
+/* function phi from equation x = phi(x), where phi(x) = r*x*(1 - x) */
 static inline dbl phi(dbl x, dbl r)
 {
    return r*x*(1 - x);
 }
 
+/* returns random point from interval (a, b) */
 static dbl get_point_from_interval(dbl a, dbl b)
 {
    static std::random_device rd;
@@ -29,6 +31,7 @@ static dbl upper_endpoint(dbl r)
    return (r + 1) / (2 * r);
 }
 
+/* returns the x(0) from the sequnce x(n) */
 static dbl get_null_point(dbl r)
 {
    dbl lp = lower_endpoint(r);
@@ -37,6 +40,7 @@ static dbl get_null_point(dbl r)
    return get_point_from_interval(lp, up);
 }
 
+/* returns vector of points that will be used for visualization */
 std::vector<dbl> get_seq_iteration_points(dbl r)
 {
    constexpr int ITERATIONS = 10; //TODO understand amount of iterations
