@@ -1,7 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include "newtons_method.h"
+#include "q_tree.h"
+
 #include <QColor>
+#include <iostream>
+
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -12,8 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
   
   ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                                   QCP::iSelectLegend | QCP::iSelectPlottables);
-  ui->customPlot->xAxis->setRange(-8, 8);
-  ui->customPlot->yAxis->setRange(-5, 5);
+  ui->customPlot->xAxis->setRange(-10, 10);
+  ui->customPlot->yAxis->setRange(-4, 4);
   ui->customPlot->axisRect()->setupFullAxesBox();
   
   ui->customPlot->plotLayout()->insertRow(0);
@@ -22,34 +28,11 @@ MainWindow::MainWindow(QWidget *parent) :
   
   ui->customPlot->xAxis->setLabel("x Axis");
   ui->customPlot->yAxis->setLabel("y Axis");
-  ui->customPlot->legend->setVisible(true);
-  QFont legendFont = font();
-  legendFont.setPointSize(10);
-  ui->customPlot->legend->setFont(legendFont);
-  ui->customPlot->legend->setSelectedFont(legendFont);
-  ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-  
+
     QCustomPlot *plot = ui->customPlot;
-    QCPColorMap *colorMap = new QCPColorMap(plot->xAxis, plot->yAxis);
-    int size_1 = 2000;
-    int size_2 = 2000;
-    colorMap->data()->setSize(size_1, size_2);
-    colorMap->data()->setRange(QCPRange(-4, 4), QCPRange(-4, 4));
     
-    colorMap->setInterpolate(false);
-    colorMap->setGradient(QCPColorGradient::gpSpectrum);
-        
-    double x, y;
-    for (int e = 0; e < size_1; e++) {
-        for (int r = 0; r < size_2; r++) {
-            colorMap->data()->cellToCoord(e, r, &x, &y);
-            colorMap->data()->setCell(e, r, calculate_color(x, y, 0.00001));
-        }
-    }
-    colorMap->setDataRange({-1, 1});
-    
-    plot->rescaleAxes();
-    plot->replot();
+    q_tree::init(plot, -4, -4, 4, 4);
+    q_tree::update_tree(plot);
   
   // connect slot that ties some axis selections together (especially opposite axes):
   connect(ui->customPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
@@ -67,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(title, SIGNAL(doubleClicked(QMouseEvent*)), this, SLOT(titleDoubleClick(QMouseEvent*)));
   
   // connect slot that shows a message in the status bar when a graph is clicked:
-  connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*,int)));
+//  connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*,int)));
   
   // setup policy and connect slot for context menu popup:
   ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -174,7 +157,9 @@ void MainWindow::mousePress()
 {
   // if an axis is selected, only allow the direction of that axis to be dragged
   // if no axis is selected, both directions may be dragged
-  
+    
+    q_tree::update_tree(ui->customPlot);
+    
   if (ui->customPlot->xAxis->selectedParts().testFlag(QCPAxis::spAxis))
     ui->customPlot->axisRect()->setRangeDrag(ui->customPlot->xAxis->orientation());
   else if (ui->customPlot->yAxis->selectedParts().testFlag(QCPAxis::spAxis))
@@ -188,6 +173,8 @@ void MainWindow::mouseWheel()
   // if an axis is selected, only allow the direction of that axis to be zoomed
   // if no axis is selected, both directions may be zoomed
   
+    q_tree::update_tree(ui->customPlot);
+    
   if (ui->customPlot->xAxis->selectedParts().testFlag(QCPAxis::spAxis))
     ui->customPlot->axisRect()->setRangeZoom(ui->customPlot->xAxis->orientation());
   else if (ui->customPlot->yAxis->selectedParts().testFlag(QCPAxis::spAxis))
@@ -287,7 +274,7 @@ void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex) {
     if (plottable->interface1D() != nullptr) {
         double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
         QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(dataIndex).arg(dataValue);
-        ui->statusBar->showMessage(message, 2500);
+//        ui->statusBar->showMessage(message, 2500);
     } else {
         // TODO
     }
