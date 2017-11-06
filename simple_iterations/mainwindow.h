@@ -14,7 +14,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
   
 public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QWidget *parent, double r);
   ~MainWindow();
   
 private slots:
@@ -24,7 +24,7 @@ private slots:
   void selectionChanged();
   void mousePress();
   void mouseWheel();
-  void addRandomGraph();
+  void addBaseGraph();
   void removeSelectedGraph();
   void removeAllGraphs();
   void contextMenuRequest(QPoint pos);
@@ -33,6 +33,7 @@ private slots:
   
 private:
   Ui::MainWindow *ui;
+  const double r;
 };
 
 #endif // MAINWINDOW_H
