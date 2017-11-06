@@ -52,3 +52,25 @@ int calculate(double x, double y, double precision) {
 double calculate_color(double x, double y, double precision) {
     return (*disp.find(calculate(x, y, precision))).second;
 }
+std::vector<std::pair<double, double>> calculate_path(double x, double y, double precision) {
+    double sq_precision = precision * precision;
+    comp_d prev(x, y);
+    
+    vector<pair<double, double>> res;
+    res.push_back({prev.real(), prev.imag()});
+    
+    for (int w = 0; w < MAX_ITERATIONS; w++) {
+        comp_d next = prev - comp_d(1/3.0) * (prev - comp_d(1) / (prev * prev));
+        swap(next, prev);
+        res.push_back({prev.real(), prev.imag()});
+        if (norm(prev - next) <= sq_precision) {
+            break;
+        }
+    }
+    for (int c = 0; c < 3; c++) {
+        if (norm(ROOTS[c] - prev) <= sq_precision + 1e-9) {
+            return res;
+        }
+    }
+    return {};
+}

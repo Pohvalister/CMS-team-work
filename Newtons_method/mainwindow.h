@@ -1,9 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <vector>
+#include <map>
+#include <memory>
+#include <set>
+
 #include <QMainWindow>
 #include <QInputDialog>
 #include "../qcustomplot.h"
+
+using namespace std;
 
 namespace Ui {
 class MainWindow;
@@ -25,13 +32,19 @@ private slots:
   void mousePress();
   void mouseWheel();
   void addRandomGraph();
-  void removeSelectedGraph();
-  void removeAllGraphs();
   void contextMenuRequest(QPoint pos);
   void moveLegend();
   void graphClicked(QCPAbstractPlottable *plottable, int dataIndex);
   
+  void draw_path(double x, double y);
+  set<shared_ptr<vector<QCPItemLine*>>> getSelectedPaths();
+  void removeAllPaths();
+  void removePath(void *ptr, bool replot = true);
+  void removeSelectedPaths();
+  
 private:
+  map<void*, shared_ptr<vector<QCPItemLine*>>> paths_of_line;
+  
   Ui::MainWindow *ui;
 };
 

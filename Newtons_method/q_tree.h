@@ -12,6 +12,8 @@ public:
     
     double square() const;
     rectangle intersect(const rectangle& another) const;
+    friend bool operator==(const rectangle& r_1, const rectangle& r_2);
+    friend bool operator!=(const rectangle& r_1, const rectangle& r_2);
     
     double x_1, y_1, x_2, y_2;
 };
@@ -41,5 +43,6 @@ private:
 };
 
 extern q_tree *root;
+extern QCPLayer *colorMapLayer;
 
 #endif // Q_TREE_H

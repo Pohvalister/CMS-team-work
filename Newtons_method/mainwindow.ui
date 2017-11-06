@@ -53,6 +53,19 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <widget class="QRadioButton" name="radioButton">
+          <property name="geometry">
+           <rect>
+            <x>500</x>
+            <y>0</y>
+            <width>621</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Рисовать путь</string>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>

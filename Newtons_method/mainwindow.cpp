@@ -6,8 +6,39 @@
 
 #include <QColor>
 #include <iostream>
+#include <cassert>
 
 using namespace std;
+
+QCPLayer *colorMapLayer;
+QCPLayer *itemLineLayer;
+
+void MainWindow::draw_path(double x, double y) {
+    vector<pair<double, double>> path = calculate_path(x, y);
+    QCustomPlot *plot = ui->customPlot;
+    
+    shared_ptr<vector<QCPItemLine*>> res = make_shared<vector<QCPItemLine*>>();
+    
+    for (size_t w = 1; w < path.size(); w++) {
+        QCPItemLine *arrow = new QCPItemLine(plot);
+        arrow->start->setCoords(path[w - 1].first, path[w - 1].second);
+        arrow->end->setCoords(path[w].first, path[w].second);
+        arrow->setHead(QCPLineEnding::esLineArrow);
+        arrow->setTail(QCPLineEnding::esDisc);
+        arrow->setLayer(itemLineLayer);
+        
+        arrow->setSelectable(true);
+        
+        QPen pen;
+        pen.setColor(QColor(Qt::darkMagenta));
+        pen.setWidthF(2);
+        arrow->setSelectedPen(pen);
+        
+        res->push_back(arrow);
+        paths_of_line[arrow] = res;
+    }
+    plot->replot();
+}
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -17,8 +48,8 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->setupUi(this);
   
   ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
-                                  QCP::iSelectLegend | QCP::iSelectPlottables);
-  ui->customPlot->xAxis->setRange(-10, 10);
+                                  QCP::iSelectLegend | QCP::iSelectPlottables | QCP::iSelectItems);
+  ui->customPlot->xAxis->setRange(-4, 4);
   ui->customPlot->yAxis->setRange(-4, 4);
   ui->customPlot->axisRect()->setupFullAxesBox();
   
@@ -28,8 +59,21 @@ MainWindow::MainWindow(QWidget *parent) :
   
   ui->customPlot->xAxis->setLabel("x Axis");
   ui->customPlot->yAxis->setLabel("y Axis");
-
+  
     QCustomPlot *plot = ui->customPlot;
+    
+    bool res;
+    res = plot->addLayer("colorMapLayer");
+    if (!res) {
+        throw runtime_error("Unable to create colorMapLayer");
+    }
+    colorMapLayer = plot->layer("colorMapLayer");
+    
+    res = plot->addLayer("itemLineLayer", colorMapLayer);
+    if (!res) {
+        throw runtime_error("Unable to create itemLineLayer");
+    }
+    itemLineLayer = plot->layer("itemLineLayer");
     
     q_tree::init(plot, -4, -4, 4, 4);
     q_tree::update_tree(plot);
@@ -50,6 +94,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(title, SIGNAL(doubleClicked(QMouseEvent*)), this, SLOT(titleDoubleClick(QMouseEvent*)));
   
   // connect slot that shows a message in the status bar when a graph is clicked:
+//  connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*,int)));
+  
 //  connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*,int)));
   
   // setup policy and connect slot for context menu popup:
@@ -110,6 +156,17 @@ void MainWindow::legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *ite
   }
 }
 
+set<shared_ptr<vector<QCPItemLine*>>> MainWindow::getSelectedPaths() {
+    set<shared_ptr<vector<QCPItemLine*>>> paths;
+    auto selectedItems = ui->customPlot->selectedItems();
+    for (auto w : selectedItems) {
+        if (paths_of_line.count(w) > 0) {
+            paths.insert(paths_of_line[w]);
+        }
+    }
+    return paths;
+}
+
 void MainWindow::selectionChanged()
 {
   /*
@@ -139,6 +196,12 @@ void MainWindow::selectionChanged()
     ui->customPlot->yAxis2->setSelectedParts(QCPAxis::spAxis|QCPAxis::spTickLabels);
     ui->customPlot->yAxis->setSelectedParts(QCPAxis::spAxis|QCPAxis::spTickLabels);
   }
+  
+    for (auto path : getSelectedPaths()) {
+        for (QCPItemLine* line : *path) {
+            line->setSelected(true);
+        }
+    }
   
   // synchronize selection of graphs with selection of corresponding legend items:
   for (int i=0; i<ui->customPlot->graphCount(); ++i)
@@ -214,43 +277,47 @@ void MainWindow::addRandomGraph()
   ui->customPlot->replot();
 }
 
-void MainWindow::removeSelectedGraph()
-{
-  if (ui->customPlot->selectedGraphs().size() > 0)
-  {
-    ui->customPlot->removeGraph(ui->customPlot->selectedGraphs().first());
+void MainWindow::removePath(void *ptr, bool replot) {
+    assert(paths_of_line.count(ptr) > 0);
+    auto path = paths_of_line[ptr];
+    for (auto w : *path) {
+        ui->customPlot->removeItem(w);
+        paths_of_line.erase(w);
+    }
+    if (replot) {
+        ui->customPlot->replot();
+    }
+}
+void MainWindow::removeAllPaths() {
+    while (paths_of_line.size() > 0) {
+        removePath((*paths_of_line.begin()).first, false);
+    }
     ui->customPlot->replot();
-  }
+}
+void MainWindow::removeSelectedPaths() {
+    auto selectedPaths = getSelectedPaths();
+    for (auto path_ptr : selectedPaths) {
+        removePath((*path_ptr)[0]);
+    }
 }
 
-void MainWindow::removeAllGraphs()
-{
-  ui->customPlot->clearGraphs();
-  ui->customPlot->replot();
-}
-
-void MainWindow::contextMenuRequest(QPoint pos)
-{
-  QMenu *menu = new QMenu(this);
-  menu->setAttribute(Qt::WA_DeleteOnClose);
-  
-  if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
-  {
-    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
-    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
-    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
-    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
-    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
-  } else  // general context menu on graphs requested
-  {
-    menu->addAction("Add random graph", this, SLOT(addRandomGraph()));
-    if (ui->customPlot->selectedGraphs().size() > 0)
-      menu->addAction("Remove selected graph", this, SLOT(removeSelectedGraph()));
-    if (ui->customPlot->graphCount() > 0)
-      menu->addAction("Remove all graphs", this, SLOT(removeAllGraphs()));
-  }
-  
-  menu->popup(ui->customPlot->mapToGlobal(pos));
+void MainWindow::contextMenuRequest(QPoint pos) {
+    if (!ui->radioButton->isChecked()) {
+        QMenu *menu = new QMenu(this);
+        menu->setAttribute(Qt::WA_DeleteOnClose);
+        
+        menu->addAction("Remove all paths", this, SLOT(removeAllPaths()));
+        
+        if (getSelectedPaths().size() > 0) {
+            menu->addAction("Remove selected paths", this, SLOT(removeSelectedPaths()));
+        }
+        menu->popup(ui->customPlot->mapToGlobal(pos));
+    } else {
+        QCustomPlot *plot = ui->customPlot;
+        double x = plot->xAxis->pixelToCoord(pos.x());
+        double y = plot->yAxis->pixelToCoord(pos.y());
+        draw_path(x, y);
+    }
 }
 
 void MainWindow::moveLegend()
