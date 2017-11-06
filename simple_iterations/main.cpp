@@ -2,13 +2,17 @@
 #include "mainwindow.h"
 #include <iostream>
 #include "seq_iterations.h"
-
+#include <dialog.h>
 
 int main(int argc, char *argv[])
 {
-   const double r = 1.5;
-
    QApplication a(argc, argv);
+
+   Dialog d;
+   d.exec();
+
+   double r = d.value;
+
    MainWindow w(nullptr, r);
    w.show();
 

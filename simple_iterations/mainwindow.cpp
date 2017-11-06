@@ -164,14 +164,21 @@ void MainWindow::addBaseGraph()
    QVector<dbl> x, y; // initialize with entries 0..100
 
    this->h = (-(r - 1)*(r - 1)) / (4*r) + (r - 1) / 2 - (r - 1) / (2*r);
-   const dbl from = (r - 1 - sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
-   const dbl to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
-   const dbl step = (to - from) / N;
+   dbl from = (r - 1 - sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
+   dbl to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
+   dbl step = (to - from) / N;
 
    x.push_back(0);
    y.push_back(0);
    x.push_back((r - 1) / r);
    y.push_back(0);
+   if (from > to) throw std::runtime_error("from > to");
+   else if (from == to && step == 0) {
+      from = -1;
+      to = 1;
+      h = 1;
+      step = 2. / N;
+   }
    for (dbl cur_x = from; cur_x <= to; cur_x += step) {
       x.push_back(cur_x);
       y.push_back(f(cur_x));
