@@ -1,9 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent, double r) :
   QMainWindow(parent),
-  ui(new Ui::MainWindow)
+  ui(new Ui::MainWindow),
+  r(r)
 {
   srand(QDateTime::currentDateTime().toTime_t());
   ui->setupUi(this);
@@ -20,40 +21,16 @@ MainWindow::MainWindow(QWidget *parent) :
   
   ui->customPlot->xAxis->setLabel("x Axis");
   ui->customPlot->yAxis->setLabel("y Axis");
-  ui->customPlot->legend->setVisible(true);
+//  ui->customPlot->legend->setVisible(true);
   QFont legendFont = font();
   legendFont.setPointSize(10);
   ui->customPlot->legend->setFont(legendFont);
   ui->customPlot->legend->setSelectedFont(legendFont);
   ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
   
-  addRandomGraph();
-  addRandomGraph();
-  addRandomGraph();
-  addRandomGraph();
+  addBaseGraph();
   ui->customPlot->rescaleAxes();
   
-  // connect slot that ties some axis selections together (especially opposite axes):
-  connect(ui->customPlot, SIGNAL(selectionChangedByUser()), this, SLOT(selectionChanged()));
-  // connect slots that takes care that when an axis is selected, only that direction can be dragged and zoomed:
-  connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePress()));
-  connect(ui->customPlot, SIGNAL(mouseWheel(QWheelEvent*)), this, SLOT(mouseWheel()));
-  
-  // make bottom and left axes transfer their ranges to top and right axes:
-  connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->customPlot->xAxis2, SLOT(setRange(QCPRange)));
-  connect(ui->customPlot->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->customPlot->yAxis2, SLOT(setRange(QCPRange)));
-  
-  // connect some interaction slots:
-  connect(ui->customPlot, SIGNAL(axisDoubleClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(axisLabelDoubleClick(QCPAxis*,QCPAxis::SelectablePart)));
-  connect(ui->customPlot, SIGNAL(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*,QMouseEvent*)), this, SLOT(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*)));
-  connect(title, SIGNAL(doubleClicked(QMouseEvent*)), this, SLOT(titleDoubleClick(QMouseEvent*)));
-  
-  // connect slot that shows a message in the status bar when a graph is clicked:
-  connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*,int)));
-  
-  // setup policy and connect slot for context menu popup:
-  ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
 }
 
 MainWindow::~MainWindow()
@@ -178,35 +155,54 @@ void MainWindow::mouseWheel()
     ui->customPlot->axisRect()->setRangeZoom(Qt::Horizontal|Qt::Vertical);
 }
 
-void MainWindow::addRandomGraph()
+void MainWindow::addBaseGraph()
 {
-  int n = 50; // number of points in graph
-  double xScale = (rand()/(double)RAND_MAX + 0.5)*2;
-  double yScale = (rand()/(double)RAND_MAX + 0.5)*2;
-  double xOffset = (rand()/(double)RAND_MAX - 0.5)*4;
-  double yOffset = (rand()/(double)RAND_MAX - 0.5)*10;
-  double r1 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r2 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r3 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r4 = (rand()/(double)RAND_MAX - 0.5)*2;
-  QVector<double> x(n), y(n);
-  for (int i=0; i<n; i++)
-  {
-    x[i] = (i/(double)n-0.5)*10.0*xScale + xOffset;
-    y[i] = (qSin(x[i]*r1*5)*qSin(qCos(x[i]*r2)*r4*3)+r3*qCos(qSin(x[i])*r4*2))*yScale + yOffset;
-  }
-  
-  ui->customPlot->addGraph();
-  ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()-1));
-  ui->customPlot->graph()->setData(x, y);
-  ui->customPlot->graph()->setLineStyle((QCPGraph::LineStyle)(rand()%5+1));
-  if (rand()%100 > 50)
-    ui->customPlot->graph()->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)(rand()%14+1)));
-  QPen graphPen;
-  graphPen.setColor(QColor(rand()%245+10, rand()%245+10, rand()%245+10));
-  graphPen.setWidthF(rand()/(double)RAND_MAX*2+1);
-  ui->customPlot->graph()->setPen(graphPen);
-  ui->customPlot->replot();
+   using dbl = double;
+   auto f = [this](dbl x) -> dbl {return -r*x*x + r*x - x;};
+
+   const int N = 101;
+   QVector<dbl> x, y; // initialize with entries 0..100
+
+   this->h = (-(r - 1)*(r - 1)) / (4*r) + (r - 1) / 2 - (r - 1) / (2*r);
+   const dbl from = (r - 1 - sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
+   const dbl to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
+   const dbl step = (to - from) / N;
+
+   x.push_back(0);
+   y.push_back(0);
+   x.push_back((r - 1) / r);
+   y.push_back(0);
+   for (dbl cur_x = from; cur_x <= to; cur_x += step) {
+      x.push_back(cur_x);
+      y.push_back(f(cur_x));
+   }
+
+   // create graph and assign data to it:
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(0)->setData(x, y);
+
+   // give the axes some labels:
+   ui->customPlot->xAxis->setLabel("x");
+   ui->customPlot->yAxis->setLabel("y");
+
+   // set axes ranges, so we see all data:
+   ui->customPlot->xAxis->setRange(from, to);
+   ui->customPlot->yAxis->setRange(-h/4, h);
+   ui->customPlot->replot();
+}
+
+void MainWindow::addStraightLine(double k)
+{
+   QVector<double> x, y;
+   const int N = 101;
+   const double step = (h + h/4) / N;
+   for (double cur_y = -h/4; cur_y <= h; cur_y += step) {
+      x.push_back(k);
+      y.push_back(cur_y);
+   }
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(++cnt)->setData(x, y);
+   ui->customPlot->replot();
 }
 
 void MainWindow::removeSelectedGraph()

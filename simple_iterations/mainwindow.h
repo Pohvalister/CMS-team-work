@@ -14,7 +14,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
   
 public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QWidget *parent, double r);
   ~MainWindow();
   
 private slots:
@@ -24,15 +24,21 @@ private slots:
   void selectionChanged();
   void mousePress();
   void mouseWheel();
-  void addRandomGraph();
+  void addBaseGraph();
   void removeSelectedGraph();
   void removeAllGraphs();
   void contextMenuRequest(QPoint pos);
   void moveLegend();
   void graphClicked(QCPAbstractPlottable *plottable, int dataIndex);
+
+public slots:
+  void addStraightLine(double k);
   
 private:
   Ui::MainWindow *ui;
+  const double r;
+  double h = 0;
+  size_t cnt = 0;
 };
 
 #endif // MAINWINDOW_H

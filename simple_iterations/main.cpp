@@ -3,17 +3,20 @@
 #include <iostream>
 #include "seq_iterations.h"
 
+
 int main(int argc, char *argv[])
 {
-//  QApplication a(argc, argv);
-//  MainWindow w;
-//  w.show();
+   const double r = 1.5;
 
-   std::vector<double> points = get_seq_iteration_points(2);
-   for (auto i: points) {
-      std::cout << i << " ";
+   QApplication a(argc, argv);
+   MainWindow w(nullptr, r);
+   w.show();
+
+   bool f = true;
+   for (size_t i = 0; i < get_amount_of_iterations(r); ++i) {
+      w.addStraightLine(get_next_point(r, f));
+      f = false;
    }
-   std::cout << std::endl;
 
-   return 0;
+   return a.exec();
 }
