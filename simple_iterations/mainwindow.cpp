@@ -168,6 +168,10 @@ void MainWindow::addBaseGraph()
    const dbl to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
    const dbl step = (to - from) / N;
 
+   x.push_back(0);
+   y.push_back(0);
+   x.push_back((r - 1) / r);
+   y.push_back(0);
    for (dbl cur_x = from; cur_x <= to; cur_x += step) {
       x.push_back(cur_x);
       y.push_back(f(cur_x));

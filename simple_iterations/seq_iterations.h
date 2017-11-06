@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 /* returns vector of points that will be used for visualization */
-std::vector<double> get_seq_iteration_points(double r);
+std::vector<double> get_seq_iteration_points(double r, size_t iterations);
 
 /**
    Calculates the next point for iterations method
@@ -16,6 +16,7 @@ std::vector<double> get_seq_iteration_points(double r);
 */
 double get_next_point(double r, bool restart);
 
+//TODO calculate the right amount of iterations following the apriot/aposerior evaluation
 size_t get_amount_of_iterations(double r);
 
 #endif // SEQ_ITERATIONS_H

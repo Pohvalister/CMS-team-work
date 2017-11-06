@@ -40,21 +40,6 @@ static dbl get_null_point(dbl r)
    return get_point_from_interval(lp, up);
 }
 
-/* returns vector of points that will be used for visualization */
-std::vector<dbl> get_seq_iteration_points(dbl r)
-{
-   int ITERATIONS = get_amount_of_iterations(r); //TODO understand amount of iterations
-
-   std::vector<dbl> ans;
-   dbl x = get_null_point(r);
-   ans.push_back(get_next_point(r, true));
-   for (int i = 0; i < ITERATIONS; i++)
-   {
-      ans.push_back(get_next_point(r, false));
-   }
-   return ans;
-}
-
 double get_next_point(double r, bool restart)
 {
    static dbl x;
@@ -69,5 +54,16 @@ double get_next_point(double r, bool restart)
 
 size_t get_amount_of_iterations(double r)
 {
-   return 10;
+   return 100;
+}
+
+std::vector<double> get_seq_iteration_points(double r, size_t iterations)
+{
+   std::vector<dbl> ans;
+   ans.push_back(get_next_point(r, true));
+   for (size_t i = 0; i < iterations; i++)
+   {
+      ans.push_back(get_next_point(r, false));
+   }
+   return ans;
 }
