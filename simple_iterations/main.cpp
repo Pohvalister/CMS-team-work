@@ -17,10 +17,7 @@ int main(int argc, char *argv[])
       w.addStraightLine(get_next_point(r, f));
       f = false;
    }*/
-   std::vector<double> cons = get_sequence_of_x_n(r);
-   for (size_t i=0;i<cons.size();i++){
-       w.addStraightLine(cons[i]);
-   }
+
 
    return a.exec();
 }

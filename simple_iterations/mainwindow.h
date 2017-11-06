@@ -24,19 +24,21 @@ private slots:
   void selectionChanged();
   void mousePress();
   void mouseWheel();
-  void addBaseGraph();
+  void addBaseGraph(double r);
   void removeSelectedGraph();
   void removeAllGraphs();
   void contextMenuRequest(QPoint pos);
   void moveLegend();
   void graphClicked(QCPAbstractPlottable *plottable, int dataIndex);
 
+  void on_pushButton_2_clicked();
+
 public slots:
   void addStraightLine(double k);
   
 private:
   Ui::MainWindow *ui;
-  const double r;
+  //const double r;
   double h = 0;
   size_t cnt = 0;
 };

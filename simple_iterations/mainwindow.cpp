@@ -1,10 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "seq_iterations.h"
 
 MainWindow::MainWindow(QWidget *parent, double r) :
   QMainWindow(parent),
-  ui(new Ui::MainWindow),
-  r(r)
+  ui(new Ui::MainWindow)
 {
   srand(QDateTime::currentDateTime().toTime_t());
   ui->setupUi(this);
@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent, double r) :
   ui->customPlot->legend->setSelectedFont(legendFont);
   ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
   
-  addBaseGraph();
+  addBaseGraph(r);
   ui->customPlot->rescaleAxes();
   
 }
@@ -155,10 +155,10 @@ void MainWindow::mouseWheel()
     ui->customPlot->axisRect()->setRangeZoom(Qt::Horizontal|Qt::Vertical);
 }
 
-void MainWindow::addBaseGraph()
+void MainWindow::addBaseGraph(double r)
 {
    using dbl = double;
-   auto f = [this](dbl x) -> dbl {return -r*x*x + r*x - x;};
+   auto f = [this, r](dbl x) -> dbl {return -r*x*x + r*x - x;};
 
    const int N = 101;
    QVector<dbl> x, y; // initialize with entries 0..100
@@ -192,7 +192,7 @@ void MainWindow::addBaseGraph()
 }
 
 void MainWindow::addStraightLine(double k)
-{
+{ 
    QVector<double> x, y;
    const int N = 101;
    const double step = (h + h/4) / N;
@@ -201,7 +201,7 @@ void MainWindow::addStraightLine(double k)
       y.push_back(cur_y);
    }
    ui->customPlot->addGraph();
-   ui->customPlot->graph(++cnt)->setData(x, y);
+   ui->customPlot->graph()->setData(x, y);
    ui->customPlot->replot();
 }
 
@@ -269,4 +269,14 @@ void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex)
 
 
 
+void MainWindow::on_pushButton_2_clicked()
+{
+    removeAllGraphs();
+    double rValue = ui->RvalueEdit->text().toDouble();
+    addBaseGraph(rValue);
 
+    std::vector<double> cons = get_sequence_of_x_n(rValue);
+    for (size_t i=0;i<cons.size();i++){
+        addStraightLine(cons[i]);
+    }
+}
