@@ -34,25 +34,40 @@ static dbl upper_endpoint(dbl r)
 /* returns the x(0) from the sequnce x(n) */
 static dbl get_null_point(dbl r)
 {
+   if (r <= 0.) throw std::runtime_error("negative constatn r is not allowed");
    dbl lp = lower_endpoint(r);
    dbl up = upper_endpoint(r);
-   if (r <= 0.) throw std::runtime_error("negative constatn r is not allowed");
    return get_point_from_interval(lp, up);
 }
 
 /* returns vector of points that will be used for visualization */
 std::vector<dbl> get_seq_iteration_points(dbl r)
 {
-   constexpr int ITERATIONS = 10; //TODO understand amount of iterations
+   int ITERATIONS = get_amount_of_iterations(r); //TODO understand amount of iterations
 
    std::vector<dbl> ans;
    dbl x = get_null_point(r);
-   ans.push_back(x);
+   ans.push_back(get_next_point(r, true));
    for (int i = 0; i < ITERATIONS; i++)
    {
-      dbl y = phi(x, r);
-      ans.push_back(y);
-      x = y;
+      ans.push_back(get_next_point(r, false));
    }
    return ans;
+}
+
+double get_next_point(double r, bool restart)
+{
+   static dbl x;
+   if (restart)
+   {
+      x = get_null_point(r);
+      return x;
+   }
+   x = phi(x, r);
+   return x;
+}
+
+size_t get_amount_of_iterations(double r)
+{
+   return 10;
 }
