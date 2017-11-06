@@ -54,7 +54,7 @@ double get_next_point(double r, bool restart)
 
 size_t get_amount_of_iterations(double r)
 {
-   return 100;
+   return 10;
 }
 
 std::vector<double> get_seq_iteration_points(double r, size_t iterations)

@@ -15,19 +15,24 @@ class Dialog : public QDialog
    Q_OBJECT
 
 public:
+   bool is_closed = false;
    explicit Dialog(QWidget *parent = 0);
    double value;
-   std::bitset<1> need_to_show;
+   std::bitset<3> need_to_show;
    ~Dialog();
 
 private slots:
    void onStartPress();
+   void onClosePress();
 
 private:
    Ui::Dialog *ui;
    QLineEdit *r_field;
    QLabel *text;
    QCheckBox *simple_it_vis;
+   QCheckBox *phi_it_vis;
+   QFormLayout *layout;
+   QCheckBox *seq_vis;
 };
 
 #endif // DIALOG_H
