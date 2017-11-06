@@ -30,10 +30,15 @@ private slots:
   void contextMenuRequest(QPoint pos);
   void moveLegend();
   void graphClicked(QCPAbstractPlottable *plottable, int dataIndex);
+
+public slots:
+  void addStraightLine(double k);
   
 private:
   Ui::MainWindow *ui;
   const double r;
+  double h = 0;
+  size_t cnt = 0;
 };
 
 #endif // MAINWINDOW_H

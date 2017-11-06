@@ -163,7 +163,7 @@ void MainWindow::addBaseGraph()
    const int N = 101;
    QVector<dbl> x, y; // initialize with entries 0..100
 
-   const dbl h = ((r - 1)*(r - 1)) / (4*r) + (r - 1) / 2 - (r - 1) / (2*r);
+   this->h = (-(r - 1)*(r - 1)) / (4*r) + (r - 1) / 2 - (r - 1) / (2*r);
    const dbl from = (r - 1 - sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
    const dbl to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
    const dbl step = (to - from) / N;
@@ -184,6 +184,20 @@ void MainWindow::addBaseGraph()
    // set axes ranges, so we see all data:
    ui->customPlot->xAxis->setRange(from, to);
    ui->customPlot->yAxis->setRange(-h/4, h);
+   ui->customPlot->replot();
+}
+
+void MainWindow::addStraightLine(double k)
+{
+   QVector<double> x, y;
+   const int N = 101;
+   const double step = (h + h/4) / N;
+   for (double cur_y = -h/4; cur_y <= h; cur_y += step) {
+      x.push_back(k);
+      y.push_back(cur_y);
+   }
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(++cnt)->setData(x, y);
    ui->customPlot->replot();
 }
 
