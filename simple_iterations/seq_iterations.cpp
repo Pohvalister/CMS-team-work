@@ -80,6 +80,12 @@ std::vector<double> get_seq_iteration_points(double r, size_t iterations)
 
 std::vector<double> get_sequence_of_x_n(double r, int it, double conv){
     dbl x = get_next_point(r,true);
+    //aposter value
+    dbl q = r* (2*x -1);
+    if (q>1/2&&q<1){
+        conv= (conv *(1-q))/q;
+    }
+    //\aposter value
     std::vector<double> answer;
     dbl xN;
     size_t iter_count=0;
