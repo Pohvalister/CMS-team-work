@@ -59,7 +59,11 @@
     </rect>
    </property>
    <property name="text">
-    <string>The vis target</string>
+    <string>r* = 1
+r**=2
+r***=r0=3
+r1=1+sqrt(6)
+r2=?</string>
    </property>
   </widget>
  </widget>

@@ -34,7 +34,7 @@ Dialog::Dialog(QWidget *parent) :
        ui->setupUi(this);
 
        //ui->AllRValues->setInteractions();
-       ui->AllRValues->xAxis->setRange(0, 228);
+       ui->AllRValues->xAxis->setRange(0, 6);
        ui->AllRValues->yAxis->setRange(-1, 1);
        ui->AllRValues->yAxis->setTicks(false);
        ui->AllRValues->axisRect()->setupFullAxesBox();
@@ -52,8 +52,8 @@ Dialog::Dialog(QWidget *parent) :
        ui->AllRValues->rescaleAxes();
 
        ///some points need to be inserted
-       const size_t amount = 1;
-       double values_mas[] = {10.1};
+       const size_t amount = 5;
+       double values_mas[] = {0,1,2,3,1+sqrt(6)};
        double h = 1;
        for (size_t i =0; i< amount;i++){
            QVector<double> x, y;
