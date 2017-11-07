@@ -1,6 +1,7 @@
 #include "seq_iterations.h"
 #include <stdexcept>
 #include <random>
+#include <math.h>
 
 using dbl = double;
 
@@ -54,16 +55,34 @@ double get_next_point(double r, bool restart)
 
 size_t get_amount_of_iterations(double r)
 {
-   return 10;
+   if (iterations_amount!=0) return iterations_amount;
+
+   if (r>=2)
+       return 100;
+   else
+       return 100;
 }
 
 std::vector<double> get_seq_iteration_points(double r, size_t iterations)
 {
    std::vector<dbl> ans;
    ans.push_back(get_next_point(r, true));
-   for (size_t i = 0; i < iterations; i++)
-   {
+   for (size_t i = 0; i < iterations; i++){
       ans.push_back(get_next_point(r, false));
    }
    return ans;
+}
+
+std::vector<double> get_sequence_of_x_n(double r){
+    dbl x = get_next_point(r,true);
+    std::vector<double> answer;
+    dbl xN;
+    size_t iter_count=0;
+    do {
+        iter_count++;
+        xN=x;
+        x=get_next_point(r,false);
+        answer.push_back(xN);
+    }while (std::abs(x-xN)>convergence_scope && iter_count<=get_amount_of_iterations(r));
+    return answer;
 }

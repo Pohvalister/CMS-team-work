@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
    double r = d.value;
    if (d.is_closed) return 0;
 
-   MainWindow w(nullptr, r);
+   MainWindow w(nullptr, r, d.need_to_show);
 
    if (d.need_to_show[0])    //Vis of simple iteration method
    {

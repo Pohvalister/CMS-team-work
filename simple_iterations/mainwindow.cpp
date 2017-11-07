@@ -1,35 +1,5 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
-
-MainWindow::MainWindow(QWidget *parent, double r) :
-  QMainWindow(parent),
-  ui(new Ui::MainWindow),
-  r(r)
-{
-  srand(QDateTime::currentDateTime().toTime_t());
-  ui->setupUi(this);
-  
-  ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
-                                  QCP::iSelectLegend | QCP::iSelectPlottables);
-  ui->customPlot->xAxis->setRange(-8, 8);
-  ui->customPlot->yAxis->setRange(-5, 5);
-  ui->customPlot->axisRect()->setupFullAxesBox();
-  
-  ui->customPlot->plotLayout()->insertRow(0);
-  QCPTextElement *title = new QCPTextElement(ui->customPlot, "Simple iterations", QFont("sans", 17, QFont::Bold));
-  ui->customPlot->plotLayout()->addElement(0, 0, title);
-  
-  ui->customPlot->xAxis->setLabel("x Axis");
-  ui->customPlot->yAxis->setLabel("y Axis");
-//  ui->customPlot->legend->setVisible(true);
-  QFont legendFont = font();
-  legendFont.setPointSize(10);
-  ui->customPlot->legend->setFont(legendFont);
-  ui->customPlot->legend->setSelectedFont(legendFont);
-  ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-  ui->customPlot->rescaleAxes();
-}
-
+#include "seq_iterations.h"
 
 MainWindow::~MainWindow()
 {
@@ -237,8 +207,8 @@ void MainWindow::addPhiGraph()
       y.push_back(cur_x);
    }
    ui->customPlot->addGraph();
-   ui->customPlot->graph(++cnt)->setData(x, y);
-   ui->customPlot->graph(cnt)->setPen(QPen(Qt::red));
+   ui->customPlot->graph(1)->setData(x, y);
+   ui->customPlot->graph(1)->setPen(QPen(Qt::red));
 
    ui->customPlot->replot();
 }
@@ -255,7 +225,7 @@ void MainWindow::addBuildLine(double k)
       y.push_back(cur_x - k + b);
    }
    ui->customPlot->addGraph();
-   ui->customPlot->graph(++cnt)->setData(x, y);
+   ui->customPlot->graph()->setData(x, y);
    ui->customPlot->replot();
 }
 
@@ -286,7 +256,7 @@ void MainWindow::addBifurGiag()
 }
 
 void MainWindow::addStraightLine(double k)
-{
+{ 
    QVector<double> x, y;
    const int N = 4;
    const double step = (h + h/4) / N;
@@ -295,7 +265,7 @@ void MainWindow::addStraightLine(double k)
       y.push_back(cur_y);
    }
    ui->customPlot->addGraph();
-   ui->customPlot->graph(++cnt)->setData(x, y);
+   ui->customPlot->graph()->setData(x, y);
    ui->customPlot->replot();
 }
 
@@ -363,4 +333,39 @@ void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex)
 
 
 
-
+void MainWindow::on_pushButton_2_clicked()
+{
+  removeAllGraphs();
+  double rValue = ui->RvalueEdit->text().toDouble();
+  this->r = rValue;
+  
+  std::vector<double> cons;
+  for (size_t i = 0; i < need_to_show.size(); i++) {
+    if (need_to_show[i]) {
+      switch (i) {
+      case 0:
+        addBaseGraph();
+        cons = get_sequence_of_x_n(rValue);
+        for (size_t i=0;i<cons.size();i++){
+          addStraightLine(cons[i]);
+        }
+        break;
+      case 1:
+        addPhiGraph();
+        cons = get_sequence_of_x_n(rValue);
+        for (size_t i=0;i<cons.size();i++){
+          addBuildLine(cons[i]);
+        }
+        break;
+      case 2:
+        addSeqGraph(get_seq_iteration_points(rValue, get_amount_of_iterations(r)));
+        break;
+      case 3:
+        addBifurGiag();
+        break;
+      default:
+        break;
+      }
+    }
+  }
+}
