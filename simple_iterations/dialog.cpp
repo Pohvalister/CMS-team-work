@@ -16,6 +16,7 @@ Dialog::Dialog(QWidget *parent) :
    simple_it_vis = new QCheckBox("Iration method vis");
    phi_it_vis = new QCheckBox("phi(x) = r*x*(1-x) vis");
    seq_vis = new QCheckBox("visualisation of sequence");
+   bifur_diag = new QCheckBox("bifurcation diagram");
 
    layout = new QFormLayout;
    layout->addWidget(ui->header);
@@ -23,6 +24,7 @@ Dialog::Dialog(QWidget *parent) :
    layout->addRow(simple_it_vis);
    layout->addRow(phi_it_vis);
    layout->addRow(seq_vis);
+   layout->addRow(bifur_diag);
 
    connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(onStartPress()));
    connect(ui->closeButton, SIGNAL(clicked(bool)), this, SLOT(onClosePress()));
@@ -39,6 +41,7 @@ Dialog::~Dialog()
    delete phi_it_vis;
    delete layout;
    delete seq_vis;
+   delete bifur_diag;
 }
 
 void Dialog::onStartPress()
@@ -48,6 +51,7 @@ void Dialog::onStartPress()
    need_to_show[0] = simple_it_vis->isChecked();
    need_to_show[1] = phi_it_vis->isChecked();
    need_to_show[2] = seq_vis->isChecked();
+   need_to_show[3] = bifur_diag->isChecked();
    accept();
 }
 

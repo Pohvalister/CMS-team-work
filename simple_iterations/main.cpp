@@ -34,6 +34,9 @@ int main(int argc, char *argv[])
    } else if (d.need_to_show[2]) //Vis of sequence
    {
       w.addSeqGraph(get_seq_iteration_points(r, get_amount_of_iterations(r)));
+   } else if (d.need_to_show[3]) //Vis of bifrcation diagramm
+   {
+      //TODO for Anna
    }
    w.show();
 

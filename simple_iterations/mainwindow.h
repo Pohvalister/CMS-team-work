@@ -36,6 +36,7 @@ public slots:
   void addPhiGraph();
   void addBuildLine(double k);
   void addSeqGraph(const std::vector<double> &points);
+  void addBifurGiag(); //TODO for Anna
   
 private:
   Ui::MainWindow *ui;

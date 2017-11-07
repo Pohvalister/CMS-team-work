@@ -18,7 +18,7 @@ public:
    bool is_closed = false;
    explicit Dialog(QWidget *parent = 0);
    double value;
-   std::bitset<3> need_to_show;
+   std::bitset<4> need_to_show;
    ~Dialog();
 
 private slots:
@@ -33,6 +33,7 @@ private:
    QCheckBox *phi_it_vis;
    QFormLayout *layout;
    QCheckBox *seq_vis;
+   QCheckBox *bifur_diag;
 };
 
 #endif // DIALOG_H

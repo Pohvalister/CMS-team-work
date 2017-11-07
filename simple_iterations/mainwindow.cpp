@@ -280,6 +280,11 @@ void MainWindow::addSeqGraph(const std::vector<double> &points)
    ui->customPlot->yAxis->setRange(-abs(1.2 * points[0]), abs(1.2 * points[0]));
 }
 
+void MainWindow::addBifurGiag()
+{
+   //TODO for Anna
+}
+
 void MainWindow::addStraightLine(double k)
 {
    QVector<double> x, y;
