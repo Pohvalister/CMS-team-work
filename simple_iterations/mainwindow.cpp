@@ -306,7 +306,7 @@ void MainWindow::addSeqGraph()
    double p = get_next_point(r, true);
    y.push_back(p);
    size_t i = 1;
-   for (; i < get_amount_of_iterations(r, 10); i++) {
+   for (; i < get_amount_of_iterations(r, iterations_amount); i++) {
       x.push_back(double(i));
       y.push_back(get_next_point(r, false));
    }
@@ -321,6 +321,7 @@ void MainWindow::addSeqGraph()
    // set axes ranges, so we see all data:
    ui->customPlot->xAxis->setRange(0, i + 1);
    ui->customPlot->yAxis->setRange(-abs(1.2 * p), abs(1.2 * p));
+   ui->customPlot->replot();
 }
 
 void MainWindow::addBifurGiag()

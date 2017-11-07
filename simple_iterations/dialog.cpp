@@ -8,19 +8,21 @@ Dialog::Dialog(QWidget *parent) :
    ui(new Ui::Dialog)
 {
    ui->setupUi(this);
+   header = new QLabel("Function: f(x) = r*x*(1-x)");
    {
       QFont fnt( "Arial", 20);
-      ui->header->setFont(fnt);
+      header->setFont(fnt);
    }
    text = new QLabel(tr("constant r"));
    r_field = new QLineEdit();
-   simple_it_vis = new QRadioButton("Iration method vis");
+   simple_it_vis = new QRadioButton("Iteration method vis");
    phi_it_vis = new QRadioButton("phi(x) = r*x*(1-x) vis");
    seq_vis = new QRadioButton("visualisation of sequence");
    bifur_diag = new QRadioButton("bifurcation diagram");
 
    layout = new QFormLayout;
-   layout->addWidget(ui->header);
+   layout->setAlignment(header, Qt::AlignHCenter);
+   layout->addWidget(header);
    layout->addRow(text, r_field);
    layout->addRow(simple_it_vis);
    layout->addRow(phi_it_vis);
@@ -63,8 +65,8 @@ Dialog::Dialog(QWidget *parent) :
            }
            ui->AllRValues->addGraph();
            ui->AllRValues->graph()->setData(x, y);
-           ui->AllRValues->replot();
        }
+       ui->AllRValues->replot();
    }
 
    connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(onStartPress()));
@@ -83,6 +85,7 @@ Dialog::~Dialog()
    delete layout;
    delete seq_vis;
    delete bifur_diag;
+   delete header;
 }
 
 void Dialog::onStartPress()

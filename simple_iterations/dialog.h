@@ -36,6 +36,7 @@ private:
    QFormLayout *layout;
    QRadioButton *seq_vis;
    QRadioButton *bifur_diag;
+   QLabel *header;
 };
 
 #endif // DIALOG_H
