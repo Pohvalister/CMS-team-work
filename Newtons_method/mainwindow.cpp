@@ -90,13 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
   
   // connect some interaction slots:
   connect(ui->customPlot, SIGNAL(axisDoubleClick(QCPAxis*,QCPAxis::SelectablePart,QMouseEvent*)), this, SLOT(axisLabelDoubleClick(QCPAxis*,QCPAxis::SelectablePart)));
-  connect(ui->customPlot, SIGNAL(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*,QMouseEvent*)), this, SLOT(legendDoubleClick(QCPLegend*,QCPAbstractLegendItem*)));
   connect(title, SIGNAL(doubleClicked(QMouseEvent*)), this, SLOT(titleDoubleClick(QMouseEvent*)));
-  
-  // connect slot that shows a message in the status bar when a graph is clicked:
-//  connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*,int)));
-  
-//  connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*,int)));
   
   connect(ui->pushButton, SIGNAL(clicked(bool)), this, SLOT(clickOnButton()));
   
@@ -105,9 +99,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
 }
 
-MainWindow::~MainWindow()
-{
-  delete ui;
+MainWindow::~MainWindow() {
+    delete ui;
 }
 
 void MainWindow::titleDoubleClick(QMouseEvent* event)
@@ -141,23 +134,6 @@ void MainWindow::axisLabelDoubleClick(QCPAxis *axis, QCPAxis::SelectablePart par
   }
 }
 
-void MainWindow::legendDoubleClick(QCPLegend *legend, QCPAbstractLegendItem *item)
-{
-  // Rename a graph by double clicking on its legend item
-  Q_UNUSED(legend)
-  if (item) // only react if item was clicked (user could have clicked on border padding of legend where there is no item, then item is 0)
-  {
-    QCPPlottableLegendItem *plItem = qobject_cast<QCPPlottableLegendItem*>(item);
-    bool ok;
-    QString newName = QInputDialog::getText(this, "QCustomPlot example", "New graph name:", QLineEdit::Normal, plItem->plottable()->name(), &ok);
-    if (ok)
-    {
-      plItem->plottable()->setName(newName);
-      ui->customPlot->replot();
-    }
-  }
-}
-
 set<shared_ptr<vector<QCPItemLine*>>> MainWindow::getSelectedPaths() {
     set<shared_ptr<vector<QCPItemLine*>>> paths;
     auto selectedItems = ui->customPlot->selectedItems();
@@ -178,10 +154,6 @@ void MainWindow::selectionChanged()
    
    The selection state of the left and right axes shall be synchronized as well as the state of the
    bottom and top axes.
-   
-   Further, we want to synchronize the selection of the graphs with the selection state of the respective
-   legend item belonging to that graph. So the user can select a graph by either clicking on the graph itself
-   or on its legend item.
   */
   
   // make top and bottom axes be selected synchronously, and handle axis and tick labels as one selectable object:
@@ -204,18 +176,6 @@ void MainWindow::selectionChanged()
             line->setSelected(true);
         }
     }
-  
-  // synchronize selection of graphs with selection of corresponding legend items:
-  for (int i=0; i<ui->customPlot->graphCount(); ++i)
-  {
-    QCPGraph *graph = ui->customPlot->graph(i);
-    QCPPlottableLegendItem *item = ui->customPlot->legend->itemWithPlottable(graph);
-    if (item->selected() || graph->selected())
-    {
-      item->setSelected(true);
-      graph->setSelection(QCPDataSelection(graph->data()->dataRange()));
-    }
-  }
 }
 
 void MainWindow::mousePress()
@@ -246,37 +206,6 @@ void MainWindow::mouseWheel()
     ui->customPlot->axisRect()->setRangeZoom(ui->customPlot->yAxis->orientation());
   else
     ui->customPlot->axisRect()->setRangeZoom(Qt::Horizontal|Qt::Vertical);
-}
-
-void MainWindow::addRandomGraph()
-{
-  int n = 50; // number of points in graph
-  double xScale = (rand()/(double)RAND_MAX + 0.5)*2;
-  double yScale = (rand()/(double)RAND_MAX + 0.5)*2;
-  double xOffset = (rand()/(double)RAND_MAX - 0.5)*4;
-  double yOffset = (rand()/(double)RAND_MAX - 0.5)*10;
-  double r1 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r2 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r3 = (rand()/(double)RAND_MAX - 0.5)*2;
-  double r4 = (rand()/(double)RAND_MAX - 0.5)*2;
-  QVector<double> x(n), y(n);
-  for (int i=0; i<n; i++)
-  {
-    x[i] = (i/(double)n-0.5)*10.0*xScale + xOffset;
-    y[i] = (qSin(x[i]*r1*5)*qSin(qCos(x[i]*r2)*r4*3)+r3*qCos(qSin(x[i])*r4*2))*yScale + yOffset;
-  }
-  
-  ui->customPlot->addGraph();
-  ui->customPlot->graph()->setName(QString("New graph %1").arg(ui->customPlot->graphCount()-1));
-  ui->customPlot->graph()->setData(x, y);
-  ui->customPlot->graph()->setLineStyle((QCPGraph::LineStyle)(rand()%5+1));
-  if (rand()%100 > 50)
-    ui->customPlot->graph()->setScatterStyle(QCPScatterStyle((QCPScatterStyle::ScatterShape)(rand()%14+1)));
-  QPen graphPen;
-  graphPen.setColor(QColor(rand()%245+10, rand()%245+10, rand()%245+10));
-  graphPen.setWidthF(rand()/(double)RAND_MAX*2+1);
-  ui->customPlot->graph()->setPen(graphPen);
-  ui->customPlot->replot();
 }
 
 void MainWindow::removePath(void *ptr, bool replot) {
@@ -322,37 +251,8 @@ void MainWindow::contextMenuRequest(QPoint pos) {
     }
 }
 
-void MainWindow::moveLegend()
-{
-  if (QAction* contextAction = qobject_cast<QAction*>(sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
-  {
-    bool ok;
-    int dataInt = contextAction->data().toInt(&ok);
-    if (ok)
-    {
-      ui->customPlot->axisRect()->insetLayout()->setInsetAlignment(0, (Qt::Alignment)dataInt);
-      ui->customPlot->replot();
-    }
-  }
-}
-
 void MainWindow::clickOnButton() {
     q_tree::redraw_tree(ui->customPlot);
 }
-
-void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex) {
-    // since we know we only have QCPGraphs in the plot, we can immediately access interface1D()
-    // usually it's better to first check whether interface1D() returns non-zero, and only then use it.
-    // upd - *dont know
-    if (plottable->interface1D() != nullptr) {
-        double dataValue = plottable->interface1D()->dataMainValue(dataIndex);
-        QString message = QString("Clicked on graph '%1' at data point #%2 with value %3.").arg(plottable->name()).arg(dataIndex).arg(dataValue);
-//        ui->statusBar->showMessage(message, 2500);
-    } else {
-        // TODO
-    }
-}
-
-
 
 

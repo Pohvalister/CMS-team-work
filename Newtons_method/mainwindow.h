@@ -27,14 +27,10 @@ public:
 private slots:
   void titleDoubleClick(QMouseEvent *event);
   void axisLabelDoubleClick(QCPAxis* axis, QCPAxis::SelectablePart part);
-  void legendDoubleClick(QCPLegend* legend, QCPAbstractLegendItem* item);
   void selectionChanged();
   void mousePress();
   void mouseWheel();
-  void addRandomGraph();
   void contextMenuRequest(QPoint pos);
-  void moveLegend();
-  void graphClicked(QCPAbstractPlottable *plottable, int dataIndex);
   
   void draw_path(double x, double y);
   set<shared_ptr<vector<QCPItemLine*>>> getSelectedPaths();
