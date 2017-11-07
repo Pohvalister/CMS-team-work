@@ -14,10 +14,10 @@ Dialog::Dialog(QWidget *parent) :
    }
    text = new QLabel(tr("constant r"));
    r_field = new QLineEdit();
-   simple_it_vis = new QCheckBox("Iration method vis");
-   phi_it_vis = new QCheckBox("phi(x) = r*x*(1-x) vis");
-   seq_vis = new QCheckBox("visualisation of sequence");
-   bifur_diag = new QCheckBox("bifurcation diagram");
+   simple_it_vis = new QRadioButton("Iration method vis");
+   phi_it_vis = new QRadioButton("phi(x) = r*x*(1-x) vis");
+   seq_vis = new QRadioButton("visualisation of sequence");
+   bifur_diag = new QRadioButton("bifurcation diagram");
 
    layout = new QFormLayout;
    layout->addWidget(ui->header);
@@ -93,7 +93,8 @@ void Dialog::onStartPress()
    need_to_show[1] = phi_it_vis->isChecked();
    need_to_show[2] = seq_vis->isChecked();
    need_to_show[3] = bifur_diag->isChecked();
-   accept();
+   if (need_to_show[0]||need_to_show[1]||need_to_show[2]||need_to_show[3])
+       accept();
 }
 
 void Dialog::onClosePress()
