@@ -17,6 +17,10 @@ std::vector<double> get_seq_iteration_points(double r, size_t iterations);
 double get_next_point(double r, bool restart);
 
 //TODO calculate the right amount of iterations following the apriot/aposerior evaluation
-size_t get_amount_of_iterations(double r);
+//TODO for Ivan
+size_t get_amount_of_iterations(double r, int it);
+
+std::vector<double> get_sequence_of_x_n (double r, int it, double conv);
+
 
 #endif // SEQ_ITERATIONS_H

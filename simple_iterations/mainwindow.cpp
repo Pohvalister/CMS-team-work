@@ -1,36 +1,54 @@
 #include "mainwindow.h"
+#include "seq_iterations.h"
+#include "iter_set_menu.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent, double r) :
-  QMainWindow(parent),
-  ui(new Ui::MainWindow),
-  r(r)
+MainWindow::MainWindow(QWidget *parent, double r, int target_id)  : QMainWindow(parent), ui(new Ui::MainWindow), r(r)
 {
-  srand(QDateTime::currentDateTime().toTime_t());
-  ui->setupUi(this);
-  
-  ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
+   srand(QDateTime::currentDateTime().toTime_t());
+   ui->setupUi(this);
+
+   std::function<void (MainWindow*)> fun0 = &MainWindow::addSimpleItVis;
+   std::function<void (MainWindow*)> fun1 = &MainWindow::addPhiItViss;
+   std::function<void (MainWindow*)> fun2 = &MainWindow::addSeqGraph;
+   std::function<void (MainWindow*)> fun3 = &MainWindow::addBifurGiag;
+   switch (target_id) {
+   case 0:
+      target_vis.swap(fun0);
+      break;
+   case 1:
+      target_vis.swap(fun1);
+      break;
+   case 2:
+      target_vis.swap(fun2);
+      break;
+   case 3:
+      target_vis.swap(fun3);
+      break;
+   default:
+      target_vis.swap(fun0);
+      break;
+   }
+
+   ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
                                   QCP::iSelectLegend | QCP::iSelectPlottables);
-  ui->customPlot->xAxis->setRange(-8, 8);
-  ui->customPlot->yAxis->setRange(-5, 5);
-  ui->customPlot->axisRect()->setupFullAxesBox();
-  
-  ui->customPlot->plotLayout()->insertRow(0);
-  QCPTextElement *title = new QCPTextElement(ui->customPlot, "Simple iterations", QFont("sans", 17, QFont::Bold));
-  ui->customPlot->plotLayout()->addElement(0, 0, title);
-  
-  ui->customPlot->xAxis->setLabel("x Axis");
-  ui->customPlot->yAxis->setLabel("y Axis");
-//  ui->customPlot->legend->setVisible(true);
-  QFont legendFont = font();
-  legendFont.setPointSize(10);
-  ui->customPlot->legend->setFont(legendFont);
-  ui->customPlot->legend->setSelectedFont(legendFont);
-  ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-  
-  addBaseGraph();
-  ui->customPlot->rescaleAxes();
-  
+   ui->customPlot->xAxis->setRange(-8, 8);
+   ui->customPlot->yAxis->setRange(-5, 5);
+   ui->customPlot->axisRect()->setupFullAxesBox();
+
+   ui->customPlot->plotLayout()->insertRow(0);
+   QCPTextElement *title = new QCPTextElement(ui->customPlot, "Simple iterations", QFont("sans", 17, QFont::Bold));
+   ui->customPlot->plotLayout()->addElement(0, 0, title);
+
+   ui->customPlot->xAxis->setLabel("x Axis");
+   ui->customPlot->yAxis->setLabel("y Axis");
+   //  ui->customPlot->legend->setVisible(true);
+   QFont legendFont = font();
+   legendFont.setPointSize(10);
+   ui->customPlot->legend->setFont(legendFont);
+   ui->customPlot->legend->setSelectedFont(legendFont);
+   ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+   ui->customPlot->rescaleAxes();
 }
 
 MainWindow::~MainWindow()
@@ -164,14 +182,21 @@ void MainWindow::addBaseGraph()
    QVector<dbl> x, y; // initialize with entries 0..100
 
    this->h = (-(r - 1)*(r - 1)) / (4*r) + (r - 1) / 2 - (r - 1) / (2*r);
-   const dbl from = (r - 1 - sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
-   const dbl to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
-   const dbl step = (to - from) / N;
+   from = (r - 1 - sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
+   to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
+   dbl step = (to - from) / N;
 
    x.push_back(0);
    y.push_back(0);
    x.push_back((r - 1) / r);
    y.push_back(0);
+   if (from > to) throw std::runtime_error("from > to");
+   else if (from == to && step == 0) {
+      from = -1;
+      to = 1;
+      h = 1;
+      step = 2. / N;
+   }
    for (dbl cur_x = from; cur_x <= to; cur_x += step) {
       x.push_back(cur_x);
       y.push_back(f(cur_x));
@@ -191,17 +216,129 @@ void MainWindow::addBaseGraph()
    ui->customPlot->replot();
 }
 
-void MainWindow::addStraightLine(double k)
+void MainWindow::addPhiGraph()
+{
+   using dbl = double;
+   auto f = [this](dbl x) -> dbl {return r*x*(1 - x);};
+   const int N = 101;
+   QVector<dbl> x, y; // initialize with entries 0..100
+
+   this->h = static_cast<dbl>(r/4);
+   from = (1 - sqrt(1 + h)) / 2;
+   to = (1 + sqrt(1 + h)) / 2;
+   dbl step = (to - from) / N;
+
+   x.push_back(0);
+   y.push_back(0);
+   x.push_back(1);
+   y.push_back(0);
+
+   for (dbl cur_x = from; cur_x <= to; cur_x += step) {
+      x.push_back(cur_x);
+      y.push_back(f(cur_x));
+   }
+
+   // create graph and assign data to it:
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(0)->setData(x, y);
+
+   // give the axes some labels:
+   ui->customPlot->xAxis->setLabel("x");
+   ui->customPlot->yAxis->setLabel("y");
+
+   // set axes ranges, so we see all data:
+   ui->customPlot->xAxis->setRange(from, to);
+   ui->customPlot->yAxis->setRange(-h/4, h);
+
+   x.clear();
+   y.clear();
+   for (dbl cur_x = from; cur_x <= to; cur_x += step) {
+      x.push_back(cur_x);
+      y.push_back(cur_x);
+   }
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(1)->setData(x, y);
+   ui->customPlot->graph(1)->setPen(QPen(Qt::red));
+
+   ui->customPlot->replot();
+}
+
+void MainWindow::addBuildLine(double k)
+{
+   auto f = [this](double x) -> double {return r*x*(1 - x);};
+   QVector<double> x, y;
+   const int N = 4;
+   const double step = (h + h/4) / N;
+   double b = f(k);
+   for (double cur_x = from; cur_x <= to; cur_x += step) {
+      x.push_back(cur_x);
+      y.push_back(cur_x - k + b);
+   }
+   ui->customPlot->addGraph();
+   ui->customPlot->graph()->setData(x, y);
+   ui->customPlot->replot();
+}
+
+void MainWindow::addSimpleItVis()
+{
+   std::vector<double> cons;
+   addBaseGraph();
+   cons = get_sequence_of_x_n(r,iterations_amount,convergence_scope);
+   for (size_t i=0;i<cons.size();i++){
+      addStraightLine(cons[i]);
+   }
+}
+
+void MainWindow::addPhiItViss()
+{
+   std::vector<double> cons;
+   addPhiGraph();
+   cons = get_sequence_of_x_n(r, iterations_amount,convergence_scope);
+   for (size_t i=0;i<cons.size();i++){
+     addBuildLine(cons[i]);
+   }
+}
+
+void MainWindow::addSeqGraph()
 {
    QVector<double> x, y;
-   const int N = 101;
+   x.push_back(0.);
+   double p = get_next_point(r, true);
+   y.push_back(p);
+   size_t i = 1;
+   for (; i < get_amount_of_iterations(r, 10); i++) {
+      x.push_back(double(i));
+      y.push_back(get_next_point(r, false));
+   }
+   // create graph and assign data to it:
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(0)->setData(x, y);
+
+   // give the axes some labels:
+   ui->customPlot->xAxis->setLabel("x");
+   ui->customPlot->yAxis->setLabel("y");
+
+   // set axes ranges, so we see all data:
+   ui->customPlot->xAxis->setRange(0, i + 1);
+   ui->customPlot->yAxis->setRange(-abs(1.2 * p), abs(1.2 * p));
+}
+
+void MainWindow::addBifurGiag()
+{
+   //TODO for Anna
+}
+
+void MainWindow::addStraightLine(double k)
+{ 
+   QVector<double> x, y;
+   const int N = 4;
    const double step = (h + h/4) / N;
    for (double cur_y = -h/4; cur_y <= h; cur_y += step) {
       x.push_back(k);
       y.push_back(cur_y);
    }
    ui->customPlot->addGraph();
-   ui->customPlot->graph(++cnt)->setData(x, y);
+   ui->customPlot->graph()->setData(x, y);
    ui->customPlot->replot();
 }
 
@@ -267,6 +404,23 @@ void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex)
   ui->statusBar->showMessage(message, 2500);
 }
 
+void MainWindow::do_new_visualisation()
+{
+   removeAllGraphs();
+   target_vis(this);
+}
 
+void MainWindow::on_pushButton_2_clicked()
+{
+   double rValue = ui->RvalueEdit->text().toDouble();
+   this->r = rValue;
+   do_new_visualisation();
+}
 
-
+void MainWindow::on_It_Set_button_clicked()
+{
+    iter_set_menu im;
+    im.exec();
+    iterations_amount = im.iters;
+    convergence_scope = im.scope;
+}
