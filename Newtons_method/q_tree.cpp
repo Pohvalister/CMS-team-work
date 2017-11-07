@@ -154,13 +154,7 @@ void q_tree::update_tree(QCustomPlot *plot) {
     double r_dx = root->rect.x_2 - root->rect.x_1;
     double r_dy = root->rect.y_2 - root->rect.y_1;
     
-    cout << root->rect.x_1 << " " << root->rect.x_2 << "   " << root->rect.y_1 << " " << root->rect.y_2 << "\n";
-    
-    cout << dx << " " << dy << "   " << r_dx << " " << r_dy << "\n";
-    
     double zoom = max(r_dx / dx, r_dy / dy);
-    
-    cout << zoom << "\n\n";
     
     int depth = OPTIMAL_DEPTH;
     while (zoom > 1) {
@@ -168,8 +162,29 @@ void q_tree::update_tree(QCustomPlot *plot) {
         depth++;
     }
     root->update(depth, range_2d, plot);
-    
     plot->replot();
+}
+
+void q_tree::clean_tree(q_tree *node, QCustomPlot *plot) {
+    if (node == nullptr) {
+        return;
+    }
+    node->deleteColorMap(plot);
+    for (int e = 0; e < 2; e++) {
+        for (int r = 0; r < 2; r++) {
+            clean_tree(node->field[e][r], plot);
+        }
+    }
+    delete node;
+}
+
+void q_tree::redraw_tree(QCustomPlot *plot) {
+    clean_tree(root, plot);
+    QCPAxisRect *rect = plot->axisRect();
+    QCPRange v_range = rect->rangeZoomAxis(Qt::Vertical)->range();
+    QCPRange h_range = rect->rangeZoomAxis(Qt::Horizontal)->range();
     
-    fflush(stdout);
+    init(plot, h_range.lower, v_range.lower,
+               h_range.upper, v_range.upper);
+    update_tree(plot);
 }

@@ -98,6 +98,8 @@ MainWindow::MainWindow(QWidget *parent) :
   
 //  connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(graphClicked(QCPAbstractPlottable*,int)));
   
+  connect(ui->pushButton, SIGNAL(clicked(bool)), this, SLOT(clickOnButton()));
+  
   // setup policy and connect slot for context menu popup:
   ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
@@ -332,6 +334,10 @@ void MainWindow::moveLegend()
       ui->customPlot->replot();
     }
   }
+}
+
+void MainWindow::clickOnButton() {
+    q_tree::redraw_tree(ui->customPlot);
 }
 
 void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex) {

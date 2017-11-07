@@ -33,9 +33,11 @@ public:
     void update(int required_depth, const rectangle& range, QCustomPlot *plot);
     
     static void init(QCustomPlot *plot, double x_1, double y_1, double x_2, double y_2);
-    
     static void update_tree(QCustomPlot *plot);
+    static void redraw_tree(QCustomPlot *plot);
 private:
+    static void clean_tree(q_tree *node, QCustomPlot *plot);
+    
     q_tree *field[2][2];
     int min_depth = 0;
     QCPColorMap *colorMap = nullptr;

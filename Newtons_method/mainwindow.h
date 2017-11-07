@@ -42,6 +42,7 @@ private slots:
   void removePath(void *ptr, bool replot = true);
   void removeSelectedPaths();
   
+  void clickOnButton();
 private:
   map<void*, shared_ptr<vector<QCPItemLine*>>> paths_of_line;
   
