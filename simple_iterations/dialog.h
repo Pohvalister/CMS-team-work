@@ -4,7 +4,6 @@
 #include <QtWidgets>
 #include <QDialog>
 #include <QLineEdit>
-#include <bitset>
 
 #include <QInputDialog>
 #include "../qcustomplot.h"
@@ -21,7 +20,7 @@ public:
    bool is_closed = false;
    explicit Dialog(QWidget *parent = 0);
    double value;
-   std::bitset<4> need_to_show;
+   int need_to_show_id;
    ~Dialog();
 
 private slots:
