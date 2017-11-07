@@ -53,6 +53,17 @@ double get_next_point(double r, bool restart)
    return x;
 }
 
+QVector<double> get_last_points(double r, size_t amount) {
+    size_t iter_amount = 1000;
+    QVector<double> answer;
+    answer.push_back(get_next_point(r, true));
+    for (size_t i = 1; i < iter_amount; ++i) {
+        answer.push_back(get_next_point(r, false));
+    }
+    int start_index = answer.size() - amount;
+    return answer.mid(start_index, amount);
+}
+
 size_t get_amount_of_iterations(double r, int iterations_amount)
 {
    if (iterations_amount!=0) return iterations_amount;

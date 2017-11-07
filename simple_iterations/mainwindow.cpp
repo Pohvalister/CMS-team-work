@@ -324,9 +324,46 @@ void MainWindow::addSeqGraph()
    ui->customPlot->replot();
 }
 
+size_t points_amount(double r) {
+    if (r > 3.57)
+        return 100;
+    if (r > 3.5441)
+        return 8;
+    if (r > 3.4495)
+        return 4;
+    if (r > 3)
+        return 2;
+    return 1;
+}
+
 void MainWindow::addBifurGiag()
 {
-   //TODO for Anna
+   QVector<double> x, y;
+   double x_start = 0.01, x_end = 4., x_step = 0.001;
+   QVector<double> to_add;
+   for (; x_start < x_end; x_start += x_step) {
+       to_add = get_last_points(x_start, points_amount(x_start));
+       y.append(to_add);
+       for (size_t i = 0; i < to_add.size(); ++i) {
+           x.push_back(x_start);
+       }
+   }
+
+   // create graph and assign data to it:
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(0)->setData(x, y);
+   ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsNone);
+   ui->customPlot->graph(0)->setScatterStyle(QCPScatterStyle::ssCircle);
+   ui->customPlot->graph(0)->setPen(QPen(QBrush(Qt::black),0.1));
+
+   // give the axes some labels:
+   ui->customPlot->xAxis->setLabel("x");
+   ui->customPlot->yAxis->setLabel("y");
+
+   // set axes ranges, so we see all data:
+   ui->customPlot->xAxis->setRange(-0.1, 4.1);
+   ui->customPlot->yAxis->setRange(-0.01, 1.01);
+   ui->customPlot->replot();
 }
 
 void MainWindow::addStraightLine(double k)
