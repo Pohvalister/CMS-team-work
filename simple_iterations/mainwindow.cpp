@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "seq_iterations.h"
+#include "iter_set_menu.h"
 
 MainWindow::~MainWindow()
 {
@@ -345,20 +346,20 @@ void MainWindow::on_pushButton_2_clicked()
       switch (i) {
       case 0:
         addBaseGraph();
-        cons = get_sequence_of_x_n(rValue);
+        cons = get_sequence_of_x_n(rValue, iterations_amount,convergence_scope);
         for (size_t i=0;i<cons.size();i++){
           addStraightLine(cons[i]);
         }
         break;
       case 1:
         addPhiGraph();
-        cons = get_sequence_of_x_n(rValue);
+        cons = get_sequence_of_x_n(rValue, iterations_amount, convergence_scope);
         for (size_t i=0;i<cons.size();i++){
           addBuildLine(cons[i]);
         }
         break;
       case 2:
-        addSeqGraph(get_seq_iteration_points(rValue, get_amount_of_iterations(r)));
+        addSeqGraph(get_seq_iteration_points(rValue, get_amount_of_iterations(r,iterations_amount)));
         break;
       case 3:
         addBifurGiag();
@@ -368,4 +369,12 @@ void MainWindow::on_pushButton_2_clicked()
       }
     }
   }
+}
+
+void MainWindow::on_It_Set_button_clicked()
+{
+    iter_set_menu im;
+    im.exec();
+    iterations_amount = im.iters;
+    convergence_scope = im.scope;
 }
