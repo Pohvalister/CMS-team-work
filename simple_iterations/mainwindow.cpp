@@ -27,11 +27,9 @@ MainWindow::MainWindow(QWidget *parent, double r) :
   ui->customPlot->legend->setFont(legendFont);
   ui->customPlot->legend->setSelectedFont(legendFont);
   ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-  
-  addBaseGraph();
   ui->customPlot->rescaleAxes();
-  
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -164,14 +162,21 @@ void MainWindow::addBaseGraph()
    QVector<dbl> x, y; // initialize with entries 0..100
 
    this->h = (-(r - 1)*(r - 1)) / (4*r) + (r - 1) / 2 - (r - 1) / (2*r);
-   const dbl from = (r - 1 - sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
-   const dbl to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
-   const dbl step = (to - from) / N;
+   from = (r - 1 - sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
+   to = (r - 1 + sqrt((r - 1) * (r - 1) + r * h))/(2 * r);
+   dbl step = (to - from) / N;
 
    x.push_back(0);
    y.push_back(0);
    x.push_back((r - 1) / r);
    y.push_back(0);
+   if (from > to) throw std::runtime_error("from > to");
+   else if (from == to && step == 0) {
+      from = -1;
+      to = 1;
+      h = 1;
+      step = 2. / N;
+   }
    for (dbl cur_x = from; cur_x <= to; cur_x += step) {
       x.push_back(cur_x);
       y.push_back(f(cur_x));
@@ -191,10 +196,99 @@ void MainWindow::addBaseGraph()
    ui->customPlot->replot();
 }
 
+void MainWindow::addPhiGraph()
+{
+   using dbl = double;
+   auto f = [this](dbl x) -> dbl {return r*x*(1 - x);};
+   const int N = 101;
+   QVector<dbl> x, y; // initialize with entries 0..100
+
+   this->h = static_cast<dbl>(r/4);
+   from = (1 - sqrt(1 + h)) / 2;
+   to = (1 + sqrt(1 + h)) / 2;
+   dbl step = (to - from) / N;
+
+   x.push_back(0);
+   y.push_back(0);
+   x.push_back(1);
+   y.push_back(0);
+
+   for (dbl cur_x = from; cur_x <= to; cur_x += step) {
+      x.push_back(cur_x);
+      y.push_back(f(cur_x));
+   }
+
+   // create graph and assign data to it:
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(0)->setData(x, y);
+
+   // give the axes some labels:
+   ui->customPlot->xAxis->setLabel("x");
+   ui->customPlot->yAxis->setLabel("y");
+
+   // set axes ranges, so we see all data:
+   ui->customPlot->xAxis->setRange(from, to);
+   ui->customPlot->yAxis->setRange(-h/4, h);
+
+   x.clear();
+   y.clear();
+   for (dbl cur_x = from; cur_x <= to; cur_x += step) {
+      x.push_back(cur_x);
+      y.push_back(cur_x);
+   }
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(++cnt)->setData(x, y);
+   ui->customPlot->graph(cnt)->setPen(QPen(Qt::red));
+
+   ui->customPlot->replot();
+}
+
+void MainWindow::addBuildLine(double k)
+{
+   auto f = [this](double x) -> double {return r*x*(1 - x);};
+   QVector<double> x, y;
+   const int N = 4;
+   const double step = (h + h/4) / N;
+   double b = f(k);
+   for (double cur_x = from; cur_x <= to; cur_x += step) {
+      x.push_back(cur_x);
+      y.push_back(cur_x - k + b);
+   }
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(++cnt)->setData(x, y);
+   ui->customPlot->replot();
+}
+
+void MainWindow::addSeqGraph(const std::vector<double> &points)
+{
+   QVector<double> x, y;
+   int i = 0;
+   for (; i < (int) points.size(); i++) {
+      x.push_back(double(i));
+      y.push_back(points[i]);
+   }
+   // create graph and assign data to it:
+   ui->customPlot->addGraph();
+   ui->customPlot->graph(0)->setData(x, y);
+
+   // give the axes some labels:
+   ui->customPlot->xAxis->setLabel("x");
+   ui->customPlot->yAxis->setLabel("y");
+
+   // set axes ranges, so we see all data:
+   ui->customPlot->xAxis->setRange(0, i + 1);
+   ui->customPlot->yAxis->setRange(-abs(1.2 * points[0]), abs(1.2 * points[0]));
+}
+
+void MainWindow::addBifurGiag()
+{
+   //TODO for Anna
+}
+
 void MainWindow::addStraightLine(double k)
 {
    QVector<double> x, y;
-   const int N = 101;
+   const int N = 4;
    const double step = (h + h/4) / N;
    for (double cur_y = -h/4; cur_y <= h; cur_y += step) {
       x.push_back(k);

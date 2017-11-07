@@ -24,7 +24,6 @@ private slots:
   void selectionChanged();
   void mousePress();
   void mouseWheel();
-  void addBaseGraph();
   void removeSelectedGraph();
   void removeAllGraphs();
   void contextMenuRequest(QPoint pos);
@@ -33,9 +32,16 @@ private slots:
 
 public slots:
   void addStraightLine(double k);
+  void addBaseGraph();
+  void addPhiGraph();
+  void addBuildLine(double k);
+  void addSeqGraph(const std::vector<double> &points);
+  void addBifurGiag(); //TODO for Anna
   
 private:
   Ui::MainWindow *ui;
+  double from;
+  double to;
   const double r;
   double h = 0;
   size_t cnt = 0;
