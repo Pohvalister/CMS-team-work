@@ -11,15 +11,18 @@ SOURCES += main.cpp\
         mainwindow.cpp \
          ../qcustomplot.cpp \
     seq_iterations.cpp \
-    dialog.cpp
+    dialog.cpp \
+    iter_set_menu.cpp
 
 HEADERS  += mainwindow.h \
          ../qcustomplot.h \
     seq_iterations.h \
-    dialog.h
+    dialog.h \
+    iter_set_menu.h
 
 FORMS    += mainwindow.ui \
-    dialog.ui
+    dialog.ui \
+    iter_set_menu.ui
 
 DISTFILES +=
 

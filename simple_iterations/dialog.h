@@ -5,6 +5,9 @@
 #include <QDialog>
 #include <QLineEdit>
 
+#include <QInputDialog>
+#include "../qcustomplot.h"
+
 namespace Ui {
 class Dialog;
 }
@@ -28,11 +31,11 @@ private:
    Ui::Dialog *ui;
    QLineEdit *r_field;
    QLabel *text;
-   QCheckBox *simple_it_vis;
-   QCheckBox *phi_it_vis;
+   QRadioButton *simple_it_vis;
+   QRadioButton *phi_it_vis;
    QFormLayout *layout;
-   QCheckBox *seq_vis;
-   QCheckBox *bifur_diag;
+   QRadioButton *seq_vis;
+   QRadioButton *bifur_diag;
 };
 
 #endif // DIALOG_H

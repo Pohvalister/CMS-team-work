@@ -18,12 +18,9 @@ double get_next_point(double r, bool restart);
 
 //TODO calculate the right amount of iterations following the apriot/aposerior evaluation
 //TODO for Ivan
-size_t get_amount_of_iterations(double r);
+size_t get_amount_of_iterations(double r, int it);
 
-static size_t iterations_amount = 0;
-static double convergence_scope = 0.0000000000001;
-
-std::vector<double> get_sequence_of_x_n (double r);
+std::vector<double> get_sequence_of_x_n (double r, int it, double conv);
 
 
 #endif // SEQ_ITERATIONS_H

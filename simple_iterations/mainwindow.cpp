@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "seq_iterations.h"
+#include "iter_set_menu.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent, double r, int target_id)  : QMainWindow(parent), ui(new Ui::MainWindow), r(r)
@@ -282,7 +283,7 @@ void MainWindow::addSimpleItVis()
 {
    std::vector<double> cons;
    addBaseGraph();
-   cons = get_sequence_of_x_n(r);
+   cons = get_sequence_of_x_n(r,iterations_amount,convergence_scope);
    for (size_t i=0;i<cons.size();i++){
       addStraightLine(cons[i]);
    }
@@ -292,7 +293,7 @@ void MainWindow::addPhiItViss()
 {
    std::vector<double> cons;
    addPhiGraph();
-   cons = get_sequence_of_x_n(r);
+   cons = get_sequence_of_x_n(r, iterations_amount,convergence_scope);
    for (size_t i=0;i<cons.size();i++){
      addBuildLine(cons[i]);
    }
@@ -305,7 +306,7 @@ void MainWindow::addSeqGraph()
    double p = get_next_point(r, true);
    y.push_back(p);
    size_t i = 1;
-   for (; i < get_amount_of_iterations(r); i++) {
+   for (; i < get_amount_of_iterations(r, 10); i++) {
       x.push_back(double(i));
       y.push_back(get_next_point(r, false));
    }
@@ -414,4 +415,12 @@ void MainWindow::on_pushButton_2_clicked()
    double rValue = ui->RvalueEdit->text().toDouble();
    this->r = rValue;
    do_new_visualisation();
+}
+
+void MainWindow::on_It_Set_button_clicked()
+{
+    iter_set_menu im;
+    im.exec();
+    iterations_amount = im.iters;
+    convergence_scope = im.scope;
 }

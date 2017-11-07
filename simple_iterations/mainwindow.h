@@ -14,9 +14,10 @@ class MainWindow : public QMainWindow
   Q_OBJECT
   
 public:
+      size_t iterations_amount = 0;
+    double convergence_scope = 0.0000000000001;
    explicit MainWindow(QWidget *parent, double r, int target_id);
   ~MainWindow();
-
    void do_new_visualisation();
 private slots:
    void titleDoubleClick(QMouseEvent *event);
@@ -40,6 +41,7 @@ private slots:
    void addPhiItViss();
    void addSeqGraph();
    void addBifurGiag(); //TODO for Anna
+   void on_It_Set_button_clicked();
   
 private:
    Ui::MainWindow *ui;
@@ -48,6 +50,7 @@ private:
    double from;
    double to;
    double h = 0;
+
 };
 
 #endif // MAINWINDOW_H
