@@ -55,13 +55,17 @@ double get_next_point(double r, bool restart)
 
 size_t get_amount_of_iterations(double r, int iterations_amount)
 {
-   size_t asdf = iterations_amount;
-   if (asdf!=0) return iterations_amount;
+   if (iterations_amount!=0) return iterations_amount;
 
-   if (r>=2)
+   if (r>=3)
+       return 1000;
+   if (r<=0.8)
        return 100;
-   else
-       return 100;
+   if (r<=1.2){
+       double tmp = std::sqrt((1 -std::abs(r-1)));
+       return 100 + 500*tmp;
+   }
+   return 100;
 }
 
 std::vector<double> get_seq_iteration_points(double r, size_t iterations)
