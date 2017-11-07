@@ -17,6 +17,9 @@ class MainWindow : public QMainWindow
   Q_OBJECT
   
 public:
+    size_t iterations_amount = 0;
+    double convergence_scope = 0.0000000000001;
+
   template <size_t bitSetSize>
   MainWindow(QWidget *parent, double r, const std::bitset<bitSetSize> &need_to_show)  : QMainWindow(parent), r(r), ui(new Ui::MainWindow)
   {
@@ -63,6 +66,8 @@ private slots:
 
   void on_pushButton_2_clicked();
 
+  void on_It_Set_button_clicked();
+
 public slots:
   void addStraightLine(double k);
   void addBaseGraph();
@@ -78,6 +83,7 @@ private:
   double to;
   double r;
   double h = 0;
+
 };
 
 #endif // MAINWINDOW_H

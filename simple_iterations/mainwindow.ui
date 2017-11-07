@@ -91,7 +91,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="It_Set_button">
           <property name="text">
            <string>Go to iteraiton set menu</string>
           </property>

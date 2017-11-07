@@ -53,9 +53,10 @@ double get_next_point(double r, bool restart)
    return x;
 }
 
-size_t get_amount_of_iterations(double r)
+size_t get_amount_of_iterations(double r, int iterations_amount)
 {
-   if (iterations_amount!=0) return iterations_amount;
+   size_t asdf = iterations_amount;
+   if (asdf!=0) return iterations_amount;
 
    if (r>=2)
        return 100;
@@ -73,7 +74,7 @@ std::vector<double> get_seq_iteration_points(double r, size_t iterations)
    return ans;
 }
 
-std::vector<double> get_sequence_of_x_n(double r){
+std::vector<double> get_sequence_of_x_n(double r, int it, double conv){
     dbl x = get_next_point(r,true);
     std::vector<double> answer;
     dbl xN;
@@ -83,6 +84,6 @@ std::vector<double> get_sequence_of_x_n(double r){
         xN=x;
         x=get_next_point(r,false);
         answer.push_back(xN);
-    }while (std::abs(x-xN)>convergence_scope && iter_count<=get_amount_of_iterations(r));
+    }while (std::abs(x-xN)>conv && iter_count<=get_amount_of_iterations(r,it));
     return answer;
 }
