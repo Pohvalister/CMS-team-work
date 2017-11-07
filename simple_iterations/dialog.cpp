@@ -48,10 +48,12 @@ void Dialog::onStartPress()
 {
    value = r_field->text().toDouble();
 //   QMessageBox::information(NULL, "Test", std::to_string(value).c_str());
-   need_to_show[0] = simple_it_vis->isChecked();
-   need_to_show[1] = phi_it_vis->isChecked();
-   need_to_show[2] = seq_vis->isChecked();
-   need_to_show[3] = bifur_diag->isChecked();
+
+   if (simple_it_vis->isChecked()) need_to_show_id = 0;
+   else if (phi_it_vis->isChecked()) need_to_show_id = 1;
+   else if (seq_vis->isChecked()) need_to_show_id = 2;
+   else if (bifur_diag->isChecked()) need_to_show_id = 3;
+
    accept();
 }
 

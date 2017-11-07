@@ -1,5 +1,54 @@
 #include "mainwindow.h"
 #include "seq_iterations.h"
+#include "ui_mainwindow.h"
+
+MainWindow::MainWindow(QWidget *parent, double r, int target_id)  : QMainWindow(parent), ui(new Ui::MainWindow), r(r)
+{
+   srand(QDateTime::currentDateTime().toTime_t());
+   ui->setupUi(this);
+
+   std::function<void (MainWindow*)> fun0 = &MainWindow::addSimpleItVis;
+   std::function<void (MainWindow*)> fun1 = &MainWindow::addPhiItViss;
+   std::function<void (MainWindow*)> fun2 = &MainWindow::addSeqGraph;
+   std::function<void (MainWindow*)> fun3 = &MainWindow::addBifurGiag;
+   switch (target_id) {
+   case 0:
+      target_vis.swap(fun0);
+      break;
+   case 1:
+      target_vis.swap(fun1);
+      break;
+   case 2:
+      target_vis.swap(fun2);
+      break;
+   case 3:
+      target_vis.swap(fun3);
+      break;
+   default:
+      target_vis.swap(fun0);
+      break;
+   }
+
+   ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectAxes |
+                                  QCP::iSelectLegend | QCP::iSelectPlottables);
+   ui->customPlot->xAxis->setRange(-8, 8);
+   ui->customPlot->yAxis->setRange(-5, 5);
+   ui->customPlot->axisRect()->setupFullAxesBox();
+
+   ui->customPlot->plotLayout()->insertRow(0);
+   QCPTextElement *title = new QCPTextElement(ui->customPlot, "Simple iterations", QFont("sans", 17, QFont::Bold));
+   ui->customPlot->plotLayout()->addElement(0, 0, title);
+
+   ui->customPlot->xAxis->setLabel("x Axis");
+   ui->customPlot->yAxis->setLabel("y Axis");
+   //  ui->customPlot->legend->setVisible(true);
+   QFont legendFont = font();
+   legendFont.setPointSize(10);
+   ui->customPlot->legend->setFont(legendFont);
+   ui->customPlot->legend->setSelectedFont(legendFont);
+   ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+   ui->customPlot->rescaleAxes();
+}
 
 MainWindow::~MainWindow()
 {
@@ -229,13 +278,36 @@ void MainWindow::addBuildLine(double k)
    ui->customPlot->replot();
 }
 
-void MainWindow::addSeqGraph(const std::vector<double> &points)
+void MainWindow::addSimpleItVis()
+{
+   std::vector<double> cons;
+   addBaseGraph();
+   cons = get_sequence_of_x_n(r);
+   for (size_t i=0;i<cons.size();i++){
+      addStraightLine(cons[i]);
+   }
+}
+
+void MainWindow::addPhiItViss()
+{
+   std::vector<double> cons;
+   addPhiGraph();
+   cons = get_sequence_of_x_n(r);
+   for (size_t i=0;i<cons.size();i++){
+     addBuildLine(cons[i]);
+   }
+}
+
+void MainWindow::addSeqGraph()
 {
    QVector<double> x, y;
-   int i = 0;
-   for (; i < (int) points.size(); i++) {
+   x.push_back(0.);
+   double p = get_next_point(r, true);
+   y.push_back(p);
+   size_t i = 1;
+   for (; i < get_amount_of_iterations(r); i++) {
       x.push_back(double(i));
-      y.push_back(points[i]);
+      y.push_back(get_next_point(r, false));
    }
    // create graph and assign data to it:
    ui->customPlot->addGraph();
@@ -247,7 +319,7 @@ void MainWindow::addSeqGraph(const std::vector<double> &points)
 
    // set axes ranges, so we see all data:
    ui->customPlot->xAxis->setRange(0, i + 1);
-   ui->customPlot->yAxis->setRange(-abs(1.2 * points[0]), abs(1.2 * points[0]));
+   ui->customPlot->yAxis->setRange(-abs(1.2 * p), abs(1.2 * p));
 }
 
 void MainWindow::addBifurGiag()
@@ -331,41 +403,15 @@ void MainWindow::graphClicked(QCPAbstractPlottable *plottable, int dataIndex)
   ui->statusBar->showMessage(message, 2500);
 }
 
-
+void MainWindow::do_new_visualisation()
+{
+   removeAllGraphs();
+   target_vis(this);
+}
 
 void MainWindow::on_pushButton_2_clicked()
 {
-  removeAllGraphs();
-  double rValue = ui->RvalueEdit->text().toDouble();
-  this->r = rValue;
-  
-  std::vector<double> cons;
-  for (size_t i = 0; i < need_to_show.size(); i++) {
-    if (need_to_show[i]) {
-      switch (i) {
-      case 0:
-        addBaseGraph();
-        cons = get_sequence_of_x_n(rValue);
-        for (size_t i=0;i<cons.size();i++){
-          addStraightLine(cons[i]);
-        }
-        break;
-      case 1:
-        addPhiGraph();
-        cons = get_sequence_of_x_n(rValue);
-        for (size_t i=0;i<cons.size();i++){
-          addBuildLine(cons[i]);
-        }
-        break;
-      case 2:
-        addSeqGraph(get_seq_iteration_points(rValue, get_amount_of_iterations(r)));
-        break;
-      case 3:
-        addBifurGiag();
-        break;
-      default:
-        break;
-      }
-    }
-  }
+   double rValue = ui->RvalueEdit->text().toDouble();
+   this->r = rValue;
+   do_new_visualisation();
 }

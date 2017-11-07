@@ -4,7 +4,6 @@
 #include <QtWidgets>
 #include <QDialog>
 #include <QLineEdit>
-#include <bitset>
 
 namespace Ui {
 class Dialog;
@@ -18,7 +17,7 @@ public:
    bool is_closed = false;
    explicit Dialog(QWidget *parent = 0);
    double value;
-   std::bitset<4> need_to_show;
+   int need_to_show_id;
    ~Dialog();
 
 private slots:
