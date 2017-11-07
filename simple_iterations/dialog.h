@@ -6,6 +6,9 @@
 #include <QLineEdit>
 #include <bitset>
 
+#include <QInputDialog>
+#include "../qcustomplot.h"
+
 namespace Ui {
 class Dialog;
 }
