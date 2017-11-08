@@ -24,14 +24,14 @@ void iter_set_menu::on_buttonBox_accepted()
     }
 
     if (ui->scope_Edit->text()!=""){
-        scope= ui->iter_Edit->text().toDouble();
+        scope= ui->scope_Edit->text().toDouble();
     }else{
-        scope = 0.0000000000001;
+        scope = 0.0001;
     }
 }
 
 void iter_set_menu::on_buttonBox_rejected()
 {
-    iters =-1;
-    scope =-1;
+    iters =0;
+    scope =0.0001;
 }

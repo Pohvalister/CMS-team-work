@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <random>
 #include <math.h>
+#include <iostream>
 
 using dbl = double;
 
@@ -68,15 +69,15 @@ size_t get_amount_of_iterations(double r, int iterations_amount)
 {
    if (iterations_amount!=0) return iterations_amount;
 
-   if (r>=3)
+   /*if (r>=3)
        return 1000;
    if (r<=0.8)
        return 100;
    if (r<=1.2){
        double tmp = std::sqrt((1 -std::abs(r-1)));
        return 100 + 500*tmp;
-   }
-   return 100;
+   }*/
+   return 500;
 }
 
 std::vector<double> get_seq_iteration_points(double r, size_t iterations)
@@ -90,15 +91,19 @@ std::vector<double> get_seq_iteration_points(double r, size_t iterations)
 }
 
 std::vector<double> get_sequence_of_x_n(double r, int it, double conv){
-    dbl x = get_next_point(r,true);
+    double x = get_next_point(r,true);
+    std::cout<<conv<<"|\n";
     //aposter value
-    dbl q = r* (2*x -1);
-    if (q>1/2&&q<1){
+    double q = r* (2*std::max(x,1-(1/r))-1);
+    std::cout<<std::max(x,1-(1/r))<<" | "<<q<<'\n';
+    if (q>(0.5)&&q<1){
         conv= (conv *(1-q))/q;
     }
     //\aposter value
+    std::cout<<conv<<"|\n";
+
     std::vector<double> answer;
-    dbl xN;
+    double xN;
     size_t iter_count=0;
     do {
         iter_count++;
@@ -106,5 +111,6 @@ std::vector<double> get_sequence_of_x_n(double r, int it, double conv){
         x=get_next_point(r,false);
         answer.push_back(xN);
     }while (std::abs(x-xN)>conv && iter_count<=get_amount_of_iterations(r,it));
-    return answer;
+   std::cout<<std::abs(x-xN)<<":"<<conv<<' '<<iter_count<<":"<<get_amount_of_iterations(r,it)<<'\n';
+   return answer;
 }

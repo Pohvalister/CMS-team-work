@@ -15,7 +15,7 @@ class MainWindow : public QMainWindow
   
 public:
       size_t iterations_amount = 0;
-    double convergence_scope = 0.0000000000001;
+    double convergence_scope = 0.0001;
    explicit MainWindow(QWidget *parent, double r, int target_id);
   ~MainWindow();
    void do_new_visualisation();
