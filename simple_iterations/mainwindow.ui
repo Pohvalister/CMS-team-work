@@ -93,7 +93,7 @@
         <item>
          <widget class="QPushButton" name="It_Set_button">
           <property name="text">
-           <string>Go to iteraiton set menu</string>
+           <string>Go to iteration set menu</string>
           </property>
          </widget>
         </item>
